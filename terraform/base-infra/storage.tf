@@ -24,35 +24,3 @@ resource "azurerm_storage_data_lake_gen2_filesystem" "this" {
   name               = "${azurerm_resource_group.this.name}"
   storage_account_id = azurerm_storage_account.this.id
 }
-
-resource "azurerm_sql_server" "base" {
-  name                         = "${azurerm_resource_group.this.name}-base"
-  resource_group_name          = "${azurerm_resource_group.this.name}"
-  location                     = "${var.location}"
-  version                      = "12.0"
-  administrator_login          = "${var.sql_username}"
-  administrator_login_password = "${var.sql_password}"
-}
-
-resource "azurerm_sql_database" "base_db" {
-  name                = "${azurerm_resource_group.this.name}-base-db"
-  resource_group_name = "${azurerm_resource_group.this.name}"
-  location            = "${var.location}"
-  server_name         = "${azurerm_sql_server.base.name}"
-}
-
-resource "azurerm_sql_database" "base_dw" {
-  name                             = "${azurerm_resource_group.this.name}-base-dw"
-  resource_group_name              = "${azurerm_resource_group.this.name}"
-  location                         = "${var.location}"
-  server_name                      = "${azurerm_sql_server.base.name}"
-  edition                          = "DataWarehouse"
-  requested_service_objective_name = "DW100c"
-}
-
-resource "azurerm_sql_virtual_network_rule" "vnet_sql_association" {
-  name                = "${azurerm_sql_server.base.name}-vnet-rule"
-  resource_group_name = "${azurerm_resource_group.this.name}"
-  server_name         = "${azurerm_sql_server.base.name}"
-  subnet_id           = "${azurerm_subnet.this.id}"
-}

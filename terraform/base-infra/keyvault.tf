@@ -37,4 +37,8 @@ resource "azurerm_key_vault" "this" {
         "restore"
       ]
     }
+
+  lifecycle {
+    ignore_changes = [access_policy]
+  }
 }

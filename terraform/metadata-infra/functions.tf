@@ -12,6 +12,25 @@ resource "azurerm_app_service_plan" "function" {
   }
 }
 
+data "azurerm_key_vault_secret" "SqlServer" {
+  name = "SqlServer"
+  key_vault_id = "${data.azurerm_key_vault.base.id}"
+}
+
+data "azurerm_key_vault_secret" "SqlDatabase" {
+  name = "SqlDatabase"
+  key_vault_id = "${data.azurerm_key_vault.base.id}"
+}
+
+data "azurerm_key_vault_secret" "SqlLogin" {
+  name = "SqlLogin"
+  key_vault_id = "${data.azurerm_key_vault.base.id}"
+}
+
+data "azurerm_key_vault_secret" "SqlPassword" {
+  name = "SqlPassword"
+  key_vault_id = "${data.azurerm_key_vault.base.id}"
+}
 
 module "qns" {
   source = "./python_function_app"
@@ -50,14 +69,14 @@ module "lineage_creator" {
   docker_image = "wgbs/lineage_creator"
   app_settings = {
     qualifiedNameServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.qns.url_secret_id})"
-#    qualifiedNameServiceKey = "${azurerm_function_app.qns.default_hostname}"
+    qualifiedNameServiceKey = "placeholder"
     jsonGeneratorServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.json_generator.url_secret_id})"
     metadataWrapperServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.api_wrapper.url_secret_id})"
 
-    # sql_server = "<sqlservername>.database.windows.net"
-    # sql_database = "<database with lineage requests>"
-    # sql_login = "<login>"
-    # sql_password = "<password>"
+    sql_server = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.SqlServer.id})"
+    sql_database = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.SqlDatabase.id})"
+    sql_login = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.SqlLogin.id})"
+    sql_password = "@Microsoft.KeyVault(SecretUri=${data.azurerm_key_vault_secret.SqlPassword.id})"
   }
 }
 
