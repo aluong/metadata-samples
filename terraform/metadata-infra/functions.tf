@@ -52,7 +52,7 @@ module "lineage_creator" {
     qualifiedNameServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.qns.url_secret_id})"
 #    qualifiedNameServiceKey = "${azurerm_function_app.qns.default_hostname}"
     jsonGeneratorServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.json_generator.url_secret_id})"
-#    metadataWrapperServiceUrl = "https://${azurerm_app_service.metadata_wrapper.default_site_hostname}"
+    metadataWrapperServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.api_wrapper.url_secret_id})"
 
     # sql_server = "<sqlservername>.database.windows.net"
     # sql_database = "<database with lineage requests>"
