@@ -6,6 +6,8 @@ variable "app_settings" {}
 variable "name" {}
 variable "docker_image" {}
 
+variable "url_secret_name"{}
+
 variable "base_resource_group_name" {}
 variable "base_acr_name" {}
 variable "base_keyvault_name" {}
@@ -43,7 +45,7 @@ resource "azurerm_function_app" "this" {
   storage_connection_string = "${var.storage_connection_string}"
   
   site_config {
-    linux_fx_version = "DOCKER|${data.azurerm_container_registry.base.login_server}/${var.docker_image}"
+    linux_fx_version = "DOCKER|${data.azurerm_container_registry.base.login_server}/${var.docker_image}:latest"
   }
 
   version = "~2"
@@ -59,6 +61,19 @@ resource "azurerm_function_app" "this" {
   } 
 }
 
+resource "azurerm_container_registry_webhook" "this" {
+  name                = "${var.name}webhook"
+  resource_group_name = "${data.azurerm_container_registry.base.resource_group_name}"
+  registry_name       = "${data.azurerm_container_registry.base.name}"
+  location            = "${data.azurerm_container_registry.base.location}"
+
+  service_uri    = "https://${azurerm_function_app.this.site_credential[0].username}:${azurerm_function_app.this.site_credential[0].password}@${azurerm_function_app.this.name}.scm.azurewebsites.net/docker/hook"
+  status         = "enabled"
+  scope          = "${var.docker_image}:*"
+  actions        = ["push"]
+  custom_headers = { "Content-Type" = "application/json" }
+}
+
 resource "azurerm_key_vault_access_policy" "this" {
   key_vault_id = "${data.azurerm_key_vault.base.id}"
 
@@ -68,4 +83,14 @@ resource "azurerm_key_vault_access_policy" "this" {
   secret_permissions = [
     "get",
   ]
+}
+
+resource "azurerm_key_vault_secret" "this" {
+  name         = "${var.url_secret_name}"
+  value        = "https://${azurerm_function_app.this.default_hostname}"
+  key_vault_id = "${data.azurerm_key_vault.base.id}"
+}
+
+output "url_secret_id" {
+  value = "${azurerm_key_vault_secret.this.id}"
 }

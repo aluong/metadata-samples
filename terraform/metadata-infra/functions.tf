@@ -22,11 +22,14 @@ module "qns" {
   app_service_plan_id       = "${azurerm_app_service_plan.function.id}"
   storage_connection_string = "${data.azurerm_storage_account.base.primary_connection_string}"
 
-  docker_image = "wgbs/qns:latest"
-  app_settings = {}
   base_resource_group_name = "${var.base_resource_group_name}"
   base_acr_name = "${var.base_acr_name}"
   base_keyvault_name = "${var.base_keyvault_name}"
+
+  url_secret_name = "QualifiedNameServiceUrl"
+
+  docker_image = "wgbs/qns"
+  app_settings = {}
 }
 
 module "lineage_creator" {
@@ -42,11 +45,13 @@ module "lineage_creator" {
   base_acr_name = "${var.base_acr_name}"
   base_keyvault_name = "${var.base_keyvault_name}"
 
-  docker_image = "wgbs/lineage_creator:latest"
+  url_secret_name = "LineageCreatorServiceUrl"
+
+  docker_image = "wgbs/lineage_creator"
   app_settings = {
-    qualifiedNameServiceUrl = "test"
+    qualifiedNameServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.qns.url_secret_id})"
 #    qualifiedNameServiceKey = "${azurerm_function_app.qns.default_hostname}"
-#    jsonGeneratorServiceUrl = "https://${azurerm_function_app.json_generator.default_hostname}"
+    jsonGeneratorServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.json_generator.url_secret_id})"
 #    metadataWrapperServiceUrl = "https://${azurerm_app_service.metadata_wrapper.default_site_hostname}"
 
     # sql_server = "<sqlservername>.database.windows.net"
@@ -69,7 +74,9 @@ module "json_generator" {
   base_acr_name = "${var.base_acr_name}"
   base_keyvault_name = "${var.base_keyvault_name}"
 
-  docker_image = "wgbs/json_generator:latest"
+  url_secret_name = "JsonGeneratorServiceUrl"
+
+  docker_image = "wgbs/json_generator"
 
   app_settings = {}
 }
