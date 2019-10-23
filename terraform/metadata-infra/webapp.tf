@@ -16,7 +16,7 @@ resource "azurerm_app_service_plan" "webapp" {
   }
 }
 
-resource "azurerm_app_service" "metadata-wrapper" {
+resource "azurerm_app_service" "metadata_wrapper" {
   name                = "${local.webapp_name}"
   resource_group_name = "${azurerm_resource_group.webapp.name}"
   location            = "${azurerm_app_service_plan.webapp.location}"
@@ -52,24 +52,24 @@ resource "azurerm_app_service" "metadata-wrapper" {
   } 
 }
 
-resource "azurerm_container_registry_webhook" "metadata-wrapper" {
+resource "azurerm_container_registry_webhook" "metadata_wrapper" {
   name                = "metadatawrapperwebhook"
   resource_group_name = "${data.azurerm_container_registry.base.resource_group_name}"
   registry_name       = "${data.azurerm_container_registry.base.name}"
   location            = "${data.azurerm_container_registry.base.location}"
 
-  service_uri    = "https://${azurerm_app_service.metadata-wrapper.site_credential[0].username}:${azurerm_app_service.metadata-wrapper.site_credential[0].password}@${azurerm_app_service.metadata-wrapper.name}.scm.azurewebsites.net/docker/hook"
+  service_uri    = "https://${azurerm_app_service.metadata_wrapper.site_credential[0].username}:${azurerm_app_service.metadata_wrapper.site_credential[0].password}@${azurerm_app_service.metadata_wrapper.name}.scm.azurewebsites.net/docker/hook"
   status         = "enabled"
   scope          = "wgbs/api-wrapper:*"
   actions        = ["push"]
   custom_headers = { "Content-Type" = "application/json" }
 }
 
-resource "azurerm_key_vault_access_policy" "metadata-wrapper" {
+resource "azurerm_key_vault_access_policy" "metadata_wrapper" {
   key_vault_id = "${data.azurerm_key_vault.base.id}"
 
-  tenant_id = "${azurerm_app_service.metadata-wrapper.identity[0].tenant_id}"
-  object_id = "${azurerm_app_service.metadata-wrapper.identity[0].principal_id}"
+  tenant_id = "${azurerm_app_service.metadata_wrapper.identity[0].tenant_id}"
+  object_id = "${azurerm_app_service.metadata_wrapper.identity[0].principal_id}"
 
   secret_permissions = [
     "get",
