@@ -140,11 +140,9 @@ resource "azurerm_template_deployment" "test" {
             "parameters": {
                 "ExecutionStartTime": {
                     "type": "string",
-                    "defaultValue": "2019-10-16T04:25:35.1798808Z"
                 },
                 "ExecutionEndTime": {
                     "type": "string",
-                    "defaultValue": "2019-10-16T04:25:50.1452973Z"
                 },
                 "SourceDataset": {
                     "type": "string",
@@ -152,15 +150,12 @@ resource "azurerm_template_deployment" "test" {
                 },
                 "SourceType": {
                     "type": "string",
-                    "defaultValue": "azure_cosmosdb_container"
                 },
                 "SourceAzureResource": {
                     "type": "string",
-                    "defaultValue": "https://adfatlasac92.cosmos.windows.net/gbssampledata/somecontainer"
                 },
                 "DestinationDataset": {
                     "type": "string",
-                    "defaultValue": "salesadlsv2"
                 },
                 "DestinationType": {
                     "type": "string",
@@ -168,7 +163,6 @@ resource "azurerm_template_deployment" "test" {
                 },
                 "DestinationAzureResource": {
                     "type": "string",
-                    "defaultValue": "https://adfatlasac92.blob.core.windows.net/filesys/2019/01/02"
                 },
                 "PipelineName": {
                     "type": "string",
