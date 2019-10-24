@@ -98,6 +98,8 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         processor.sql.getModifiedDatasets = MagicMock(return_value=datasets)
 
+        processor.sql.deleteRequests = MagicMock()
+
         #region Qualified Name client mock setup
         qnClientMock = MockQualifiedNameClient()
 
@@ -352,6 +354,8 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         #endregion verify metadata client calls
   
+        processor.sql.deleteRequests.assert_called_with([9, 10])
+
     def testscanEventMissingEntity(self):
 
         processor = LineageEventProcessor(config)
@@ -414,6 +418,8 @@ class LineageEventProcessorTest(unittest.TestCase):
         ]
 
         processor.sql.getModifiedDatasets = MagicMock(return_value=datasets)
+
+        processor.sql.deleteRequests = MagicMock()
 
         #region Qualified Name client mock setup
         qnClientMock = MockQualifiedNameClient()
@@ -585,6 +591,8 @@ class LineageEventProcessorTest(unittest.TestCase):
         metadataClientMock.entity_bulk_post_using_post.assert_called_with(expectedMD2)
 
         #endregion verify metadata client calls
+
+        processor.sql.deleteRequests.assert_called_with([9, 10])
 
 if __name__ == '__main__': 
     unittest.main() 
