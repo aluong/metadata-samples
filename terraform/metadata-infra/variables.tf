@@ -45,7 +45,7 @@ variable "app_service_plan_location" {
 variable "func_app_service_plan_tier" {
   description = "Tier of the App Service Plan"
   type        = "string"
-  default     = "ElasticPremium"
+  default     = "PremiumV2"
 }
 
 variable "func_app_service_plan_size" {
@@ -87,4 +87,8 @@ variable "base_keyvault_name" {
 
 variable "base_acr_name" {
   type = "string"
+}
+
+variable "sql_db_connection_string" {
+ type = "string" 
 }
