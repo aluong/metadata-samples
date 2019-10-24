@@ -19,7 +19,7 @@
                         "type": "DelimitedTextSource",
                         "storeSettings": {
                             "type": "AzureBlobFSReadSettings",
-                            "recursive": true,
+                            "recursive": false,
                             "wildcardFolderPath": "*",
                             "wildcardFileName": "*.*",
                             "enablePartitionDiscovery": false
@@ -49,7 +49,7 @@
                 ],
                 "outputs": [
                     {
-                        "referenceName": "salesadlsv2",
+                        "referenceName": "salesadls",
                         "type": "DatasetReference"
                     }
                 ]
@@ -77,13 +77,16 @@
                             "value": "@{activity('Copy Data1').ExecutionStartTime}",
                             "type": "Expression"
                         },
-                        "ExecutionEndTime": "@{activity('Copy Data1').ExecutionEndTime}",
+                        "ExecutionEndTime": {
+                            "value": "@{activity('Copy Data1').ExecutionEndTime}",
+                            "type": "Expression"
+                        },
                         "SourceDataset": "SampleAdlsSource",
                         "SourceType": "azure_datalake_gen2_resource_set",
-                        "SourceAzureResource": "https://beamdatav2.dfs.core.windows.net/sales/2019/8/20/0/0/sales-201982000.csv",
-                        "DestinationDataset": "salesadlsv2",
+                        "SourceAzureResource": "https://beamdatav2.dfs.core.windows.net/sales/2019/8/20/0/0",
+                        "DestinationDataset": "salesadls",
                         "DestinationType": "azure_datalake_gen2_filesystem",
-                        "DestinationAzureResource": "https://beamdatav2.dfs.core.windows.net/salesv2",
+                        "DestinationAzureResource": "https://beamdatav2.dfs.core.windows.net/sales",
                         "PipelineName": {
                             "value": "@pipeline().Pipeline",
                             "type": "Expression"
@@ -132,7 +135,7 @@
                 ],
                 "outputs": [
                     {
-                        "referenceName": "salesadlsv2",
+                        "referenceName": "salesadls",
                         "type": "DatasetReference"
                     }
                 ]
@@ -156,14 +159,20 @@
                     },
                     "waitOnCompletion": true,
                     "parameters": {
-                        "ExecutionStartTime": "@{activity('Copy SQL to ADLS').ExecutionStartTime}",
-                        "ExecutionEndTime": "@{activity('Copy SQL to ADLS').ExecutionEndTime}",
+                        "ExecutionStartTime": {
+                            "value": "@{activity('Copy SQL to ADLS').ExecutionStartTime}",
+                            "type": "Expression"
+                        },
+                        "ExecutionEndTime": {
+                            "value": "@{activity('Copy SQL to ADLS').ExecutionEndTime}",
+                            "type": "Expression"
+                        },
                         "SourceDataset": "AzureSqlDWTable1",
                         "SourceType": "azure_sql_table",
                         "SourceAzureResource": "https://gbssqlserver.database.windows.net/gbssqldw/salesv2",
-                        "DestinationDataset": "salesadlsv2",
+                        "DestinationDataset": "salesadls",
                         "DestinationType": "azure_datalake_gen2_filesystem",
-                        "DestinationAzureResource": "https://beamdatav2.dfs.core.windows.net/salesv2",
+                        "DestinationAzureResource": "https://beamdatav2.dfs.core.windows.net/sales",
                         "PipelineName": {
                             "value": "@pipeline().Pipeline",
                             "type": "Expression"
