@@ -14,7 +14,7 @@ paths:
           in: query
           required: false
           type: string
-          x-example: DCJoZnzNKZ4teDSPicw5578a9xhPTKXbcqqDuOzi9XIWtbtzcCxZbw
+          x-example: key
         - name: typeName
           in: query
           required: false
@@ -36,7 +36,7 @@ paths:
           in: query
           required: false
           type: string
-          x-example: DCJoZnzNKZ4teDSPicw5578a9xhPTKXbcqqDuOzi9XIWtbtzcCxZbw
+          x-example: key
         - name: typeName
           in: query
           required: false
@@ -56,7 +56,6 @@ paths:
               - $ref: '#/definitions/azure_sql_table'
               - $ref: '#/definitions/azure_sql_column'
               - $ref: '#/definitions/file_server'
-              - $ref: '#/definitions/file_path'
               - $ref: '#/definitions/file_path'
               - $ref: '#/definitions/azure_cosmosdb_account'
               - $ref: '#/definitions/azure_cosmosdb_database'

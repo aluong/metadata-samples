@@ -54,9 +54,11 @@ class JsonGeneratorClient(SDKClient):
 
 
     def create_lineage_data(
-            self, body=None, custom_headers=None, raw=False, **operation_config):
+            self, code=None, body=None, custom_headers=None, raw=False, **operation_config):
         """
 
+        :param code:
+        :type code: str
         :param body:
         :type body: ~swagger.models.Request
         :param dict custom_headers: headers that will be added to the request
@@ -74,6 +76,8 @@ class JsonGeneratorClient(SDKClient):
 
         # Construct parameters
         query_parameters = {}
+        if code is not None:
+            query_parameters['code'] = self._serialize.query("code", code, 'str')
 
         # Construct headers
         header_parameters = {}
@@ -105,4 +109,4 @@ class JsonGeneratorClient(SDKClient):
             return client_raw_response
 
         return deserialized
-    create_lineage_data.metadata = {'url': '/api/atlas_lineage_create'}
+    create_lineage_data.metadata = {'url': '/api/lineage-json-creator-svc'}

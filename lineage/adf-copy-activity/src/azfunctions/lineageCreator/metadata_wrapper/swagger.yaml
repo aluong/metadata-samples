@@ -114,7 +114,7 @@ paths:
           description: ipJSON
           required: true
           schema:
-            type: string
+            type: object
       responses:
         '200':
           description: OK

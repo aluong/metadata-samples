@@ -14,7 +14,7 @@ class Entities(Model):
     :param type_name:
     :type type_name: str
     :param guid:
-    :type guid: int
+    :type guid: str
     :param created_by:
     :type created_by: str
     :param attributes:
@@ -23,12 +23,12 @@ class Entities(Model):
 
     _attribute_map = {
         'type_name': {'key': 'typeName', 'type': 'str'},
-        'guid': {'key': 'guid', 'type': 'int'},
+        'guid': {'key': 'guid', 'type': 'str'},
         'created_by': {'key': 'createdBy', 'type': 'str'},
         'attributes': {'key': 'attributes', 'type': 'Attributes'},
     }
 
-    def __init__(self, *, type_name: str=None, guid: int=None, created_by: str=None, attributes=None, **kwargs) -> None:
+    def __init__(self, *, type_name: str=None, guid: str=None, created_by: str=None, attributes=None, **kwargs) -> None:
         super(Entities, self).__init__(**kwargs)
         self.type_name = type_name
         self.guid = guid
