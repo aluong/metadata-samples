@@ -46,6 +46,7 @@ resource "azurerm_function_app" "this" {
   
   site_config {
     linux_fx_version = "DOCKER|${data.azurerm_container_registry.base.login_server}/${var.docker_image}:latest"
+    always_on        = "true"
   }
 
   version = "~2"
