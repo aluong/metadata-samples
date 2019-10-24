@@ -88,3 +88,7 @@ variable "base_keyvault_name" {
 variable "base_acr_name" {
   type = "string"
 }
+
+variable "sql_db_connection_string" {
+ type = "string" 
+}
