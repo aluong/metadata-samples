@@ -169,7 +169,7 @@
                         },
                         "SourceDataset": "AzureSqlDWTable1",
                         "SourceType": "azure_sql_table",
-                        "SourceAzureResource": "https://gbssqlserver.database.windows.net/gbssqldw/salesv2",
+                        "SourceAzureResource": "https://<sql-server-name>.database.windows.net/<db-name>/salesv2",
                         "DestinationDataset": "salesadls",
                         "DestinationType": "azure_datalake_gen2_filesystem",
                         "DestinationAzureResource": "https://beamdatav2.dfs.core.windows.net/sales",
