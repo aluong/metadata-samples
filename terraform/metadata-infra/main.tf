@@ -4,6 +4,12 @@ provider "azurerm" {
   version = "=1.35.0"
 }
 
+terraform {
+    backend "azurerm" {
+        container_name = "terraform"
+    }
+}
+
 resource "azurerm_resource_group" "this" {
   name     = "${var.resource_group_name}"
   location = "${var.location}"
