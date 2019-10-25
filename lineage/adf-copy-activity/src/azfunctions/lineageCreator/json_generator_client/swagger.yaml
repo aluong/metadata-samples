@@ -4,7 +4,7 @@ info:
   version: '0.1'
   title: JsonGeneratorClient
 paths:
-  /api/atlas_lineage_create:
+  /api/lineage-json-creator-svc:
     post:
       operationId: createLineageData
       consumes:
@@ -12,6 +12,11 @@ paths:
       produces:
         - application/json
       parameters:
+        - name: code
+          in: query
+          required: false
+          type: string
+          x-example: key
         - in: body
           name: body
           required: false
@@ -19,8 +24,8 @@ paths:
             $ref: '#/definitions/Request'
           x-examples:
             application/json: >-
-              { "name": "derived_from_col_dq", "type_name": "derived_from_col",
-              "qualified_name":
+              {"guid": "-100", "name": "derived_from_col_dq", "type_name":
+              "derived_from_col", "qualified_name":
               "process/derived_from_col/dqrule/azure_sql_column", "created_by":
               "sg", "process_attributes": [{"attr_name": "StartTime",
               "attr_value": "10:40:09", "is_entityref": false}, {"attr_name":
@@ -58,6 +63,8 @@ definitions:
         type: string
   Request:
     properties:
+      guid:
+        type: string
       name:
         type: string
       type_name:
@@ -113,8 +120,7 @@ definitions:
       typeName:
         type: string
       guid:
-        type: integer
-        format: int32
+        type: string
       createdBy:
         type: string
       attributes:

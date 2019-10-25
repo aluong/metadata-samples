@@ -14,7 +14,7 @@ class Entities(Model):
     :param type_name:
     :type type_name: str
     :param guid:
-    :type guid: int
+    :type guid: str
     :param created_by:
     :type created_by: str
     :param attributes:
@@ -23,7 +23,7 @@ class Entities(Model):
 
     _attribute_map = {
         'type_name': {'key': 'typeName', 'type': 'str'},
-        'guid': {'key': 'guid', 'type': 'int'},
+        'guid': {'key': 'guid', 'type': 'str'},
         'created_by': {'key': 'createdBy', 'type': 'str'},
         'attributes': {'key': 'attributes', 'type': 'Attributes'},
     }

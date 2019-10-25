@@ -47,7 +47,7 @@ module "metadata_utility_services" {
 
   url_secret_name = "QualifiedNameServiceUrl"
 
-  docker_image = "wgbs/metadata_utility_services"
+  docker_image = "metadata/metadata_utility_services"
   app_settings = {}
 }
 
@@ -66,7 +66,7 @@ module "lineage_creator" {
 
   url_secret_name = "LineageCreatorServiceUrl"
 
-  docker_image = "wgbs/lineage_creator"
+  docker_image = "metadata/lineage_creator"
   app_settings = {
     qualifiedNameServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.metadata_utility_services.url_secret_id})"
     qualifiedNameServiceKey = ""

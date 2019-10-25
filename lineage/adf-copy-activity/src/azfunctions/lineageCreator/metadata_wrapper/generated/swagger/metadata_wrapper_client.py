@@ -215,7 +215,7 @@ class MetadataWrapperClient(SDKClient):
         """entityBulkPost.
 
         :param ip_json: ipJSON
-        :type ip_json: str
+        :type ip_json: object
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -240,7 +240,7 @@ class MetadataWrapperClient(SDKClient):
             header_parameters.update(custom_headers)
 
         # Construct body
-        body_content = self._serialize.body(ip_json, 'str')
+        body_content = self._serialize.body(ip_json, 'object')
 
         # Construct and send request
         request = self._client.post(url, query_parameters, header_parameters, body_content)

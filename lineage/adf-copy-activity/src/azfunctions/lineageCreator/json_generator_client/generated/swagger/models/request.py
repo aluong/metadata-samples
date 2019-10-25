@@ -11,6 +11,8 @@ from msrest.serialization import Model
 class Request(Model):
     """Request.
 
+    :param guid:
+    :type guid: str
     :param name:
     :type name: str
     :param type_name:
@@ -28,6 +30,7 @@ class Request(Model):
     """
 
     _attribute_map = {
+        'guid': {'key': 'guid', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
         'type_name': {'key': 'type_name', 'type': 'str'},
         'qualified_name': {'key': 'qualified_name', 'type': 'str'},
@@ -39,6 +42,7 @@ class Request(Model):
 
     def __init__(self, **kwargs):
         super(Request, self).__init__(**kwargs)
+        self.guid = kwargs.get('guid', None)
         self.name = kwargs.get('name', None)
         self.type_name = kwargs.get('type_name', None)
         self.qualified_name = kwargs.get('qualified_name', None)
