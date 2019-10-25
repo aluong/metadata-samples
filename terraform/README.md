@@ -1,4 +1,4 @@
-# wgbs_infra
+# metadata_infra
 
 ## Deploying resources via Terraform
 
