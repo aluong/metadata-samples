@@ -34,6 +34,12 @@ resource "azurerm_container_group" "this" {
         port = 2181
       }
     }
+
+    provisioner "local-exec" {
+      command = <<EOT
+        curl -X POST --max-time 1800 -H "Content-Type: application-json" http://admin:admin@${azurerm_container_group.this.ip_address}:21000/api/atlas/v2/types/typedefs -d @${path.module}/atlas_configuration/typedefs.json
+EOT
+    }
 }
 
 # Upload Atlas connection data to the KeyVault
