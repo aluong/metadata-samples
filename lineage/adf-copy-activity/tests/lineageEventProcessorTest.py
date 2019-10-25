@@ -47,8 +47,8 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         datasets = [{
                 'activity_name': 'Copy SQL to ADLS',
-                'azure_resource': 'https://gbssqlserver.database.windows.net/gbssqldw/salesv2',
-                'datafactory_name': 'walmart-gbs-adf',
+                'azure_resource': 'https://x1sqlserver.database.windows.net/x1sqldw/salesv2',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'AzureSqlDWTable1',
                 'dataset_id': 42,
                 'direction': 'source',
@@ -60,7 +60,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             }, {
                 'activity_name': 'Copy SQL to ADLS',
                 'azure_resource': 'https://beamdatav2.dfs.core.windows.net/salesv2',
-                'datafactory_name': 'walmart-gbs-adf',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'salesadlsv2',
                 'dataset_id': 43,
                 'direction': 'destination',
@@ -72,7 +72,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             }, {
                 'activity_name': 'Copy Data1',
                 'azure_resource': 'https://beamdatav2.dfs.core.windows.net/sales/2019/8/20/0/0/sales-201982000.csv',
-                'datafactory_name': 'walmart-gbs-adf',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'SampleAdlsSource',
                 'dataset_id': 44,
                 'direction': 'source',
@@ -84,7 +84,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             }, {
                 'activity_name': 'Copy Data1',
                 'azure_resource': 'https://beamdatav2.dfs.core.windows.net/salesv2',
-                'datafactory_name': 'walmart-gbs-adf',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'salesadlsv2',
                 'dataset_id': 45,
                 'direction': 'destination',
@@ -108,12 +108,12 @@ class LineageEventProcessorTest(unittest.TestCase):
         qnClientMock.get_qualified_name = MagicMock()
 
         qnNames = [ 
-                'https://gbssqlserver.database.windows.net/gbssqldw/salesv2',
+                'https://x1sqlserver.database.windows.net/x1sqldw/salesv2',
                 'https://beamdatav2.dfs.core.windows.net/salesv2',
                 'https://beamdatav2.dfs.core.windows.net/sales/2019/8/20/0/0/sales-201982000.csv',
                 'https://beamdatav2.dfs.core.windows.net/salesv2',
-                'walmart-gbs-adf/DataCopyWithLineage/Copy SQL to ADLS',
-                'walmart-gbs-adf/DataCopyWithLineage/Copy Data1'
+                'prefix-x1-adf/DataCopyWithLineage/Copy SQL to ADLS',
+                'prefix-x1-adf/DataCopyWithLineage/Copy Data1'
             ]
 
         qnResponses = [QualifiedName(**{'guid': uuid.uuid4(), 'is_exists': True, 'qualified_name': n}) for n in qnNames]
@@ -136,7 +136,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             attributes=Attributes(
                 inputs=[Inputs(guid=qnResponses[0].guid, type_name='azure_sql_table')],
                 outputs=[Outputs(guid=qnResponses[1].guid, type_name='azure_datalake_gen2_filesystem')],
-                qualified_name='walmart-gbs-adf/DataCopyWithLineage/Copy SQL to ADLS', 
+                qualified_name='prefix-x1-adf/DataCopyWithLineage/Copy SQL to ADLS', 
                 name='Copy SQL to ADLS', 
                 start_time=int(start_time1.timestamp()),
                 end_time=int(end_time1.timestamp())
@@ -150,7 +150,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             attributes=Attributes(
                 inputs=[Inputs(guid=qnResponses[2].guid, type_name='azure_datalake_gen2_resource_set')],
                 outputs=[Outputs(guid=qnResponses[3].guid, type_name='azure_datalake_gen2_filesystem')],
-                qualified_name='walmart-gbs-adf/DataCopyWithLineage/Copy Data1', 
+                qualified_name='prefix-x1-adf/DataCopyWithLineage/Copy Data1', 
                 name='Copy Data1', 
                 start_time=int(start_time2.timestamp()),
                 end_time=int(end_time2.timestamp())
@@ -179,8 +179,8 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         expectedQnCall1 = call(
             body=AzureSqlTable(**{
-                'azure_sql_server_uri' : 'https://gbssqlserver.database.windows.net',
-                'database_name' : 'gbssqldw',
+                'azure_sql_server_uri' : 'https://x1sqlserver.database.windows.net',
+                'database_name' : 'x1sqldw',
                 'azure_sql_table_name' : 'salesv2'}), 
             code='qualifiedNameServiceKey', 
             type_name='azure_sql_table')
@@ -209,7 +209,7 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         expectedQnCall5 = call(
             body=AdfCopyActivity(**{
-                'datafactory_name' : 'walmart-gbs-adf',
+                'datafactory_name' : 'prefix-x1-adf',
                 'pipeline_name' : 'DataCopyWithLineage',
                 'activity_name' : 'Copy SQL to ADLS'}), 
             code='qualifiedNameServiceKey', 
@@ -217,7 +217,7 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         expectedQnCall6 = call(
             body=AdfCopyActivity(**{
-                'datafactory_name' : 'walmart-gbs-adf',
+                'datafactory_name' : 'prefix-x1-adf',
                 'pipeline_name' : 'DataCopyWithLineage',
                 'activity_name' : 'Copy Data1'}), 
             code='qualifiedNameServiceKey', 
@@ -255,7 +255,7 @@ class LineageEventProcessorTest(unittest.TestCase):
                 guid=qnResponses[4].guid,
                 name='Copy SQL to ADLS', 
                 type_name='adf_copy_activity', 
-                qualified_name='walmart-gbs-adf/DataCopyWithLineage/Copy SQL to ADLS', 
+                qualified_name='prefix-x1-adf/DataCopyWithLineage/Copy SQL to ADLS', 
                 created_by='ADF', 
                 process_attributes=process_attributes,
                 inputs=inputs, 
@@ -283,7 +283,7 @@ class LineageEventProcessorTest(unittest.TestCase):
                 guid=qnResponses[5].guid,
                 name='Copy Data1', 
                 type_name='adf_copy_activity', 
-                qualified_name='walmart-gbs-adf/DataCopyWithLineage/Copy Data1', 
+                qualified_name='prefix-x1-adf/DataCopyWithLineage/Copy Data1', 
                 created_by='ADF', 
                 process_attributes=process_attributes,
                 inputs=inputs, 
@@ -312,7 +312,7 @@ class LineageEventProcessorTest(unittest.TestCase):
                                 "typeName": "azure_datalake_gen2_filesystem"
                             }
                         ],
-                        "qualifiedName": "walmart-gbs-adf/DataCopyWithLineage/Copy SQL to ADLS",
+                        "qualifiedName": "prefix-x1-adf/DataCopyWithLineage/Copy SQL to ADLS",
                         "name": "Copy SQL to ADLS",
                         "StartTime": int(start_time1.timestamp()),
                         "EndTime": int(end_time1.timestamp())
@@ -339,7 +339,7 @@ class LineageEventProcessorTest(unittest.TestCase):
                                 "typeName": "azure_datalake_gen2_filesystem"
                             }
                         ],
-                        "qualifiedName": "walmart-gbs-adf/DataCopyWithLineage/Copy Data1",
+                        "qualifiedName": "prefix-x1-adf/DataCopyWithLineage/Copy Data1",
                         "name": "Copy Data1",
                         "StartTime": int(start_time2.timestamp()),
                         "EndTime": int(end_time2.timestamp())
@@ -368,8 +368,8 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         datasets = [{
                 'activity_name': 'Copy SQL to ADLS',
-                'azure_resource': 'https://gbssqlserver.database.windows.net/gbssqldw/salesv2',
-                'datafactory_name': 'walmart-gbs-adf',
+                'azure_resource': 'https://x1sqlserver.database.windows.net/x1sqldw/salesv2',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'AzureSqlDWTable1',
                 'dataset_id': 42,
                 'direction': 'source',
@@ -381,7 +381,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             }, {
                 'activity_name': 'Copy SQL to ADLS',
                 'azure_resource': 'https://beamdatav2.dfs.core.windows.net/salesv2',
-                'datafactory_name': 'walmart-gbs-adf',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'salesadlsv2',
                 'dataset_id': 43,
                 'direction': 'destination',
@@ -393,7 +393,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             }, {
                 'activity_name': 'Copy Data1',
                 'azure_resource': 'https://beamdatav2.dfs.core.windows.net/sales/2019/8/20/0/0/sales-201982000.csv',
-                'datafactory_name': 'walmart-gbs-adf',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'SampleAdlsSource',
                 'dataset_id': 44,
                 'direction': 'source',
@@ -405,7 +405,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             }, {
                 'activity_name': 'Copy Data1',
                 'azure_resource': 'https://beamdatav2.dfs.core.windows.net/salesv2',
-                'datafactory_name': 'walmart-gbs-adf',
+                'datafactory_name': 'prefix-x1-adf',
                 'dataset': 'salesadlsv2',
                 'dataset_id': 45,
                 'direction': 'destination',
@@ -429,12 +429,12 @@ class LineageEventProcessorTest(unittest.TestCase):
         qnClientMock.get_qualified_name = MagicMock()
 
         qnNames = [ 
-                'https://gbssqlserver.database.windows.net/gbssqldw/salesv2',
+                'https://x1sqlserver.database.windows.net/x1sqldw/salesv2',
                 'https://beamdatav2.dfs.core.windows.net/salesv2',
                 'https://beamdatav2.dfs.core.windows.net/sales/2019/8/20/0/0/sales-201982000.csv',
                 'https://beamdatav2.dfs.core.windows.net/salesv2',
-                'walmart-gbs-adf/DataCopyWithLineage/Copy SQL to ADLS',
-                'walmart-gbs-adf/DataCopyWithLineage/Copy Data1'
+                'prefix-x1-adf/DataCopyWithLineage/Copy SQL to ADLS',
+                'prefix-x1-adf/DataCopyWithLineage/Copy Data1'
             ]
 
         qnResponses = [
@@ -462,7 +462,7 @@ class LineageEventProcessorTest(unittest.TestCase):
             attributes=Attributes(
                 inputs=[Inputs(guid=qnResponses[1].guid, type_name='azure_datalake_gen2_resource_set')],
                 outputs=[Outputs(guid=qnResponses[2].guid, type_name='azure_datalake_gen2_filesystem')],
-                qualified_name='walmart-gbs-adf/DataCopyWithLineage/Copy Data1', 
+                qualified_name='prefix-x1-adf/DataCopyWithLineage/Copy Data1', 
                 name='Copy Data1', 
                 start_time=int(start_time2.timestamp()),
                 end_time=int(end_time2.timestamp())
@@ -492,8 +492,8 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         expectedQnCall1 = call(
             body=AzureSqlTable(**{
-                'azure_sql_server_uri' : 'https://gbssqlserver.database.windows.net',
-                'database_name' : 'gbssqldw',
+                'azure_sql_server_uri' : 'https://x1sqlserver.database.windows.net',
+                'database_name' : 'x1sqldw',
                 'azure_sql_table_name' : 'salesv2'}), 
             code='qualifiedNameServiceKey', 
             type_name='azure_sql_table')
@@ -515,7 +515,7 @@ class LineageEventProcessorTest(unittest.TestCase):
 
         expectedQnCall6 = call(
             body=AdfCopyActivity(**{
-                'datafactory_name' : 'walmart-gbs-adf',
+                'datafactory_name' : 'prefix-x1-adf',
                 'pipeline_name' : 'DataCopyWithLineage',
                 'activity_name' : 'Copy Data1'}), 
             code='qualifiedNameServiceKey', 
@@ -551,7 +551,7 @@ class LineageEventProcessorTest(unittest.TestCase):
                 guid=qnResponses[3].guid,
                 name='Copy Data1', 
                 type_name='adf_copy_activity', 
-                qualified_name='walmart-gbs-adf/DataCopyWithLineage/Copy Data1', 
+                qualified_name='prefix-x1-adf/DataCopyWithLineage/Copy Data1', 
                 created_by='ADF', 
                 process_attributes=process_attributes,
                 inputs=inputs, 
@@ -579,7 +579,7 @@ class LineageEventProcessorTest(unittest.TestCase):
                                 "typeName": "azure_datalake_gen2_filesystem"
                             }
                         ],
-                        "qualifiedName": "walmart-gbs-adf/DataCopyWithLineage/Copy Data1",
+                        "qualifiedName": "prefix-x1-adf/DataCopyWithLineage/Copy Data1",
                         "name": "Copy Data1",
                         "StartTime": int(start_time2.timestamp()),
                         "EndTime": int(end_time2.timestamp())
