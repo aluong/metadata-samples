@@ -30,7 +30,7 @@ module "api_wrapper" {
 
   url_secret_name = "ApiWrapperUrl"
 
-  docker_image = "wgbs/api-wrapper"
+  docker_image = "metadata/api-wrapper"
 
   app_settings = {
     AtlasPassword = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.atlas_password.id})"

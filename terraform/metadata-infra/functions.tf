@@ -47,7 +47,7 @@ module "qns" {
 
   url_secret_name = "QualifiedNameServiceUrl"
 
-  docker_image = "wgbs/qns"
+  docker_image = "metadata/qns"
   app_settings = {}
 }
 
@@ -66,7 +66,7 @@ module "lineage_creator" {
 
   url_secret_name = "LineageCreatorServiceUrl"
 
-  docker_image = "wgbs/lineage_creator"
+  docker_image = "metadata/lineage_creator"
   app_settings = {
     qualifiedNameServiceUrl = "@Microsoft.KeyVault(SecretUri=${module.qns.url_secret_id})"
     qualifiedNameServiceKey = "placeholder"
@@ -95,7 +95,7 @@ module "json_generator" {
 
   url_secret_name = "JsonGeneratorServiceUrl"
 
-  docker_image = "wgbs/json_generator"
+  docker_image = "metadata/json_generator"
 
   app_settings = {}
 }
