@@ -1,0 +1,159 @@
+{
+    "structDefs": [
+    ],
+    "classificationDefs": [
+    ],
+    "entityDefs": [
+        {
+            "category": "ENTITY",
+            "version": 1,
+            "name": "azure_datalake_gen2_filesystem",
+            "description": "azure_datalake_gen2_filesystem",
+            "typeVersion": "1.0",
+            "attributeDefs": [
+              {
+                "name": "modifiedTime",
+                "typeName": "date",
+                "isOptional": true,
+                "cardinality": "SINGLE",
+                "valuesMinCount": 0,
+                "valuesMaxCount": 1,
+                "isUnique": false,
+                "isIndexable": false,
+                "includeInNotification": false
+              },
+              {
+                "name": "userProperties",
+                "typeName": "map<string,string>",
+                "isOptional": true,
+                "cardinality": "SINGLE",
+                "valuesMinCount": 0,
+                "valuesMaxCount": 1,
+                "isUnique": false,
+                "isIndexable": false,
+                "includeInNotification": false
+              }
+            ],
+            "superTypes": [
+              "DataSet"
+            ],
+            "subTypes": []
+        },
+        {
+            "category": "ENTITY",
+            "version": 1,
+            "name": "azure_sql_table",
+            "description": "azure_sql_table",
+            "typeVersion": "1.0",
+            "attributeDefs": [
+              {
+                "name": "principalId",
+                "typeName": "int",
+                "isOptional": true,
+                "cardinality": "SINGLE",
+                "valuesMinCount": 0,
+                "valuesMaxCount": 1,
+                "isUnique": false,
+                "isIndexable": false,
+                "includeInNotification": false
+              },
+              {
+                "name": "objectType",
+                "typeName": "string",
+                "isOptional": true,
+                "cardinality": "SINGLE",
+                "valuesMinCount": 0,
+                "valuesMaxCount": 1,
+                "isUnique": false,
+                "isIndexable": false,
+                "includeInNotification": false
+              },
+              {
+                "name": "createTime",
+                "typeName": "date",
+                "isOptional": true,
+                "cardinality": "SINGLE",
+                "valuesMinCount": 0,
+                "valuesMaxCount": 1,
+                "isUnique": false,
+                "isIndexable": false,
+                "includeInNotification": false
+              },
+              {
+                "name": "modifiedTime",
+                "typeName": "date",
+                "isOptional": true,
+                "cardinality": "SINGLE",
+                "valuesMinCount": 0,
+                "valuesMaxCount": 1,
+                "isUnique": false,
+                "isIndexable": false,
+                "includeInNotification": false
+              }
+            ],
+            "superTypes": [
+              "DataSet"
+            ],
+            "subTypes": []
+        },
+        {
+          "category": "ENTITY",
+          "version": 2,
+          "name": "adf_copy_activity",
+          "description": "adf_copy_activity",
+          "typeVersion": "1.0",
+          "attributeDefs": [
+            {
+              "name": "lastRunTime",
+              "typeName": "date",
+              "isOptional": true,
+              "cardinality": "SINGLE",
+              "valuesMinCount": 0,
+              "valuesMaxCount": 1,
+              "isUnique": false,
+              "isIndexable": false,
+              "includeInNotification": false
+            },
+            {
+              "name": "columnMapping",
+              "typeName": "string",
+              "isOptional": true,
+              "cardinality": "SINGLE",
+              "valuesMinCount": 0,
+              "valuesMaxCount": 1,
+              "isUnique": false,
+              "isIndexable": false,
+              "includeInNotification": false
+            },
+            {
+              "name": "dataSize",
+              "typeName": "long",
+              "isOptional": true,
+              "cardinality": "SINGLE",
+              "valuesMinCount": 0,
+              "valuesMaxCount": 1,
+              "isUnique": false,
+              "isIndexable": false,
+              "includeInNotification": false
+            },
+            {
+              "name": "rowCount",
+              "typeName": "long",
+              "isOptional": true,
+              "cardinality": "SINGLE",
+              "valuesMinCount": 0,
+              "valuesMaxCount": 1,
+              "isUnique": false,
+              "isIndexable": false,
+              "includeInNotification": false
+            }
+          ],
+          "superTypes": [
+            "Process"
+          ],
+          "subTypes": []
+      }
+    ],
+    "relationshipDefs": [
+    ]
+}
