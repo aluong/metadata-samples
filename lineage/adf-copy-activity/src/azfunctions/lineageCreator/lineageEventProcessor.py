@@ -10,7 +10,7 @@ from .sqlWrapper import SqlWrapper
 from .qnRequestBuilder import buildDatasetQNRequest
 
 from .qualified_name_client.generated.swagger.models.adf_copy_activity_py3 import AdfCopyActivity
-from .json_generator_client.generated.swagger.models import Request, Response, Inputs, Outputs
+from .json_generator_client.generated.swagger.models import Request, Response, Inputs, Outputs, ProcessAttributes
 
 class LineageEventProcessor:
     def __init__(self, config):
@@ -25,7 +25,7 @@ class LineageEventProcessor:
 
         self._reportActivities(lineageRequests)
 
-        #self._deleteRequests(lineageRequests) #keep the records while debuging
+        self._deleteRequests(lineageRequests)
 
     def _buildLineageRequests(self, datasets):
         lineageRequests = {}
@@ -46,35 +46,37 @@ class LineageEventProcessor:
                     'destinations' : [], 
                     'valid': False 
                 }
+            elif not lineageRequests[requestId]['valid']:
+                continue
 
             if dataset['direction'].lower() == "source":
                 lineageRequests[requestId]['sources'] += [dataset]
             else:
                 lineageRequests[requestId]['destinations'] += [dataset]
+            
+            dsInfo = buildDatasetQNRequest(dataset)
 
-            try:
-                dsInfo = buildDatasetQNRequest(dataset)
-
-                if dsInfo is not None:
+            if dsInfo is not None:
+                try:
                     qn = qnClient.get_qualified_name(
                         type_name=dataset['type'], 
                         body=dsInfo, 
                         code=self.config['qualifiedNameServiceKey'])
-                    
-                    dataset["qualified_name"] = qn.qualified_name
+                except Exception as e:
+                    logging.error('Error querying qualified name for request %s: %s' % (requestId, e))
+                    continue
+                
+                dataset["qualified_name"] = qn.qualified_name
 
-                    if qn.is_exists:
-                        dataset["guid"] = qn.guid
-                        lineageRequests[requestId]['valid'] = True
-                    else:
-                        logging.error('Type "%s" does not exist in the Qualified Service' % dataset['type'])
-                        dataset["guid"] = str(uuid.uuid4()) # for debugging
-
-            except Exception as e:
-                logging.error('Error processing request %s: %s' % (requestId, e))
+                if qn.is_exists:
+                    dataset["guid"] = qn.guid
+                    lineageRequests[requestId]['valid'] = True
+                else:
+                    logging.error('Type "%s" does not exist in the Qualified Service' % dataset['type'])
 
         for lineageRequest in lineageRequests.values():
-            #if not lineageRequest['valid']: continue todo: enable when types are available
+            if not lineageRequest['valid']: 
+                continue
 
             activityInfo = AdfCopyActivity(**{
                 'datafactory_name' : lineageRequest['datafactory_name'],
@@ -87,44 +89,48 @@ class LineageEventProcessor:
                 body=activityInfo, 
                 code=self.config['qualifiedNameServiceKey'])
 
-            lineageRequest['qualified_name'] = qn.qualified_name
             if qn.is_exists:
                 lineageRequest['guid'] = qn.guid
             else:
-                lineageRequest['valid'] = False
-                logging.error('Type "adf_copy_activity" does not exist in the Qualified Service')
-                lineageRequest['guid'] = str(uuid.uuid4()) # for debugging
+                logging.info('adf_copy_activity does not exist in the Qualified Service')
+                lineageRequest['guid'] = -100
+
+            lineageRequest['qualified_name'] = qn.qualified_name
 
         return lineageRequests
 
     def _reportActivities(self, lineageRequests):
         for lineageRequest in lineageRequests.values():
-            #if not lineageRequest['valid']: continue todo: enable when types are available
-            self._reportActivity(lineageRequest)
+            if not lineageRequest['valid']: 
+                continue 
+
+            try:
+                self._reportActivity(lineageRequest)
+            except Exception as e:
+                logging.error('Error posting lineage "%s": %s' % (lineageRequest['qualified_name'], e))
 
         logging.info('%d lineage requests processed', len(lineageRequests))
 
     def _reportActivity(self, lineageRequest):
         jsonClient = self.restFactory.getJsonGeneratorClient()
-        metadataClient = self.restFactory.getMetadataClient()
-
         process_attributes = [
-            {
+            ProcessAttributes(**{
                 'attr_name': 'StartTime',
-                'attr_value': lineageRequest['execution_start_time'],
+                'attr_value': int(lineageRequest['execution_start_time'].timestamp()),
                 'is_entityref': False
-            },
-            {
+            }),
+            ProcessAttributes(**{
                 'attr_name': 'EndTime',
-                'attr_value': lineageRequest['execution_end_time'],
+                'attr_value': int(lineageRequest['execution_end_time'].timestamp()),
                 'is_entityref': False
-            }
+            })
         ]
 
         inputs = [Inputs(guid=s['guid'], type_name=s['type']) for s in lineageRequest['sources']]
         outputs = [Outputs(guid=s['guid'], type_name=s['type']) for s in lineageRequest['destinations']]
 
         request = Request(
+            guid=lineageRequest['guid'],
             name=lineageRequest['activity_name'], 
             type_name='adf_copy_activity', 
             qualified_name=lineageRequest['qualified_name'], 
@@ -133,15 +139,18 @@ class LineageEventProcessor:
             inputs=inputs, 
             outputs=outputs)
 
-        response = jsonClient.create_lineage_data(body=request)
+        response = jsonClient.create_lineage_data(body=request, code=self.config['jsonGeneratorServiceKey'])
 
-        lineageRequest['lineageData'] = response
+        metadataRequest = response.serialize()
+        metadataRequest['entities'][0]['attributes']['StartTime'] = int(metadataRequest['entities'][0]['attributes']['StartTime'])
+        metadataRequest['entities'][0]['attributes']['EndTime'] = int(metadataRequest['entities'][0]['attributes']['EndTime'])
 
-        response.entities[0].guid = lineageRequest['guid'] # json generator doesn't support it yet, do ity here manually
+        metadataRequestLog = json.dumps(metadataRequest)
+        logging.info('Sending "%s" request to metadata wrapper' % metadataRequestLog)
 
-        metadataRequest = json.dumps(response, default=lambda o: o.__dict__)
+        metadataClient = self.restFactory.getMetadataClient()
 
-        response = metadataClient.entity_post_using_post(metadataRequest)
+        response = metadataClient.entity_bulk_post_using_post(metadataRequest)
 
     def _deleteRequests(self, lineageRequests):
         ids = [id for id in lineageRequests.keys()]

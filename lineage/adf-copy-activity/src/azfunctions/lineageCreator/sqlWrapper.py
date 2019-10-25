@@ -4,17 +4,8 @@ import os
 
 class SqlWrapper:
     def __init__(self, config):
-        logging.info('Connecting to SQL db %s at %s as %s' % 
-            (config['sql_database'], config['sql_server'], config['sql_login']))
-
-        self.connection = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};"
-                            "Server=%s;Database=%s;uid=%s;pwd=%s;" % 
-                            (
-                                config['sql_server'],
-                                config['sql_database'],
-                                config['sql_login'], 
-                                config['sql_password']
-                            ))
+        self.config = config
+        self._connection = None
         
     def getModifiedDatasets(self):
 
@@ -35,7 +26,7 @@ class SqlWrapper:
             JOIN [dbo].[tbl_datasets] d on d.clm_int_lineage_request_id = r.clm_int_id
             """
 
-        cursor = self.connection.cursor()
+        cursor = self._getConnection().cursor()
 
         cursor.execute(selectStatement)
 
@@ -55,9 +46,24 @@ class SqlWrapper:
             WHERE clm_int_id in (%s)
             """ % parameters
 
-        cursor = self.connection.cursor()
+        cursor = self._getConnection().cursor()
         cursor.execute(deleteStatement, requestIds)
 
-        self.connection.commit()
+        self._getConnection().commit()
 
         logging.info('%d lineage requests deleted from the SQL DB', len(requestIds))
+
+    def _getConnection(self):
+        if self._connection is None:
+            logging.info('Connecting to SQL db %s at %s as %s' % 
+                (self.config['sql_database'], self.config['sql_server'], self.config['sql_login']))
+
+            self._connection = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};"
+                                "Server=%s;Database=%s;uid=%s;pwd=%s;" % 
+                                (
+                                    self.config['sql_server'],
+                                    self.config['sql_database'],
+                                    self.config['sql_login'], 
+                                    self.config['sql_password']
+                                ))
+        return self._connection
