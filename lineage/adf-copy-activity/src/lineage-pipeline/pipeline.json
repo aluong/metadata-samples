@@ -104,44 +104,34 @@
         ],
         "parameters": {
             "ExecutionStartTime": {
-                "type": "string",
-                "defaultValue": "2019-10-16T04:25:35.1798808Z"
+                "type": "string"
             },
             "ExecutionEndTime": {
-                "type": "string",
-                "defaultValue": "2019-10-16T04:25:50.1452973Z"
+                "type": "string"
             },
             "SourceDataset": {
-                "type": "string",
-                "defaultValue": "OneFile"
+                "type": "string"
             },
             "SourceType": {
-                "type": "string",
-                "defaultValue": "azure_cosmosdb_container"
+                "type": "string"
             },
             "SourceAzureResource": {
-                "type": "string",
-                "defaultValue": "https://adfatlasac92.cosmos.windows.net/gbssampledata/somecontainer"
+                "type": "string"
             },
             "DestinationDataset": {
-                "type": "string",
-                "defaultValue": "salesadlsv2"
+                "type": "string"
             },
             "DestinationType": {
-                "type": "string",
-                "defaultValue": "azure_datalake_gen2_resource_set"
+                "type": "string"
             },
             "DestinationAzureResource": {
-                "type": "string",
-                "defaultValue": "https://adfatlasac92.blob.core.windows.net/filesys/2019/01/02"
+                "type": "string"
             },
             "PipelineName": {
-                "type": "string",
-                "defaultValue": "pipelineName"
+                "type": "string"
             },
             "ActivityName": {
-                "type": "string",
-                "defaultValue": "ActivityName"
+                "type": "string"
             }
         },
         "variables": {
