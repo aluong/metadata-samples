@@ -90,9 +90,27 @@ steps:
     INFRA_ACR=`terraform output base_acr_name`
     echo "##vso[task.setvariable variable=INFRA_ACR]$INFRA_ACR"
 
+    INFRA_SQL_SERVER=`terraform output base_sql_server_name`
+    echo "##vso[task.setvariable variable=INFRA_SQL_SERVER]$INFRA_SQL_SERVER"
+
+    INFRA_SQL_DB=`terraform output base_sql_database_name`
+    echo "##vso[task.setvariable variable=INFRA_SQL_DB]$INFRA_SQL_DB"
+
     INFRA_SQL_DB_CONN=`terraform output sql_db_connection_string`
     echo "##vso[task.setvariable variable=INFRA_SQL_DB_CONN]$INFRA_SQL_DB_CONN"
-    
+
+    INFRA_SQL_DW_CONN=`terraform output sql_dw_connection_string`
+    echo "##vso[task.setvariable variable=INFRA_SQL_DW_CONN]$INFRA_SQL_DW_CONN"
+
+    INFRA_ADLS_KEY=`terraform output adls_primary_access_key`
+    echo "##vso[task.setvariable variable=INFRA_ADLS_KEY]$INFRA_ADLS_KEY"
+
+    INFRA_ADLS_URl=`terraform output adls_properties_url`
+    echo "##vso[task.setvariable variable=INFRA_ADLS_URl]$INFRA_ADLS_URl"
+
+    INFRA_ADLS=`terraform output adls_name`
+    echo "##vso[task.setvariable variable=INFRA_ADLS]$INFRA_ADLS"
+
   displayName: 'Deploy base infrastructure'
   workingDirectory: terraform/base-infra
 
@@ -114,7 +132,13 @@ steps:
       -var 'data_factory_name=$(tf_metadata_data_factory_name)' \
       -var 'base_keyvault_name=$(INFRA_KV)' \
       -var 'base_acr_name=$(INFRA_ACR)' \
+      -var 'base_sql_server_name=$(INFRA_SQL_SERVER)' \
+      -var 'base_sql_database_name=$(INFRA_SQL_DB)' \
       -var 'sql_db_connection_string=$(INFRA_SQL_DB_CONN)' \
+      -var 'sql_dw_connection_string=$(INFRA_SQL_DW_CONN)' \
+      -var 'adls_primary_access_key=$(INFRA_ADLS_KEY)' \
+      -var 'adls_properties_url=$(INFRA_ADLS_URl)' \
+      -var 'adls_name=$(INFRA_ADLS)' \
       -auto-approve
     
   displayName: 'Deploy Metadata infrastructure'
