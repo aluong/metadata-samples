@@ -25,3 +25,30 @@ output "base_acr_name" {
 output "sql_db_connection_string" {
   value = "Server=tcp:${azurerm_sql_server.base.name}.database.windows.net,1433;Initial Catalog=${azurerm_sql_database.base_db.name};Persist Security Info=False;User ID=${var.sql_username};Password=${var.sql_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 }
+
+output "sql_dw_connection_string" {
+  value = "Server=tcp:${azurerm_sql_server.base.name}.database.windows.net,1433;Initial Catalog=${azurerm_sql_database.base_dw.name};Persist Security Info=False;User ID=${var.sql_username};Password=${var.sql_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+}
+
+output "adls_primary_access_key" {
+  value = "${azurerm_storage_account.this.primary_access_key}"
+}
+
+output "adls_properties_url" {
+  value = "${azurerm_storage_account.this.primary_dfs_host}"
+}
+
+output "adls_name" {
+  value = "${azurerm_storage_data_lake_gen2_filesystem.this.name}"
+}
+
+
+output "sql_server_name" {
+  value = "${azurerm_sql_server.base.name}"
+}
+
+output "sql_dw_name" {
+  value = "${azurerm_sql_database.base_dw.name}"
+}
+
+

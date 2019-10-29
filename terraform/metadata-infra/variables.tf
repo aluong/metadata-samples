@@ -92,3 +92,28 @@ variable "base_acr_name" {
 variable "sql_db_connection_string" {
  type = "string" 
 }
+
+variable "sql_dw_connection_string" {
+ type = "string" 
+}
+
+variable "adls_name" {
+ description = "Name of Azure Datalake Storage"
+ type = "string" 
+}
+
+variable "adls_primary_access_key" {
+ type = "string" 
+}
+
+variable "adls_properties_url" {
+  type = "string"
+}
+
+variable "sql_server_name" {
+  type = "string"
+}
+
+variable "sql_dw_name" {
+  type = "string"
+}
