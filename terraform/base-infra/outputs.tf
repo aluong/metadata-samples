@@ -51,12 +51,4 @@ output "adls_name" {
 }
 
 
-output "sql_server_name" {
-  value = "${azurerm_sql_server.base.name}"
-}
-
-output "sql_dw_name" {
-  value = "${azurerm_sql_database.base_dw.name}"
-}
-
 

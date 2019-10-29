@@ -119,11 +119,3 @@ variable "adls_primary_access_key" {
 variable "adls_properties_url" {
   type = "string"
 }
-
-variable "sql_server_name" {
-  type = "string"
-}
-
-variable "sql_dw_name" {
-  type = "string"
-}
