@@ -1,13 +1,14 @@
 locals {
   curl_options = "-X POST -s --max-time 1800 --retry-connrefused --retry 100 --retry-delay 30 -H \"Content-Type: application/json\""
-  rendered_entities = "${templatefile("${path.module}/atlas_configuration/entities.json", {database = "test", storage = "test"})}"
+  entities_parameters = {
+    database = "https://${data.azurerm_sql_server.base.fqdn}/${var.base_sql_database_name}"
+    storage = "${data.azurerm_storage_account.base.primary_dfs_endpoint}"
+  }
+  rendered_entities = "${templatefile("${path.module}/atlas_configuration/entities.json", "${local.entities_parameters}")}"
   # Remove new lines, extra spaces and replace escape quotes
   entities = "${replace(replace(replace(local.rendered_entities, "\n", ""), " ", ""), "\"", "\\\"")}"
 }
 
-output "test" {
-  value = "${local.entities}"
-}
 resource "azurerm_container_group" "this" {
   name                  = "${var.atlas_dns_name}"
   resource_group_name   = "${azurerm_resource_group.this.name}"
