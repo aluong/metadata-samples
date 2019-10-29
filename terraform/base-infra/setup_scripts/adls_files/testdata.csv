@@ -1,0 +1,2 @@
+CustomerID,Discount,ProductID,Quantity,SalesDate,SalesID,SalesPersonID,TotalPrice,TransactionNumber
+1,0.5,2,10,00:11.5,test-123,test,100,test-123

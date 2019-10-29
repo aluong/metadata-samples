@@ -1,0 +1,563 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+        "adls_name": {
+            "type": "string",
+            "metadata": "Name of ADLS Blob Container"
+        },
+		"adls_primary_access_key": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adls'"
+		},
+		"adls_properties_url": {
+			"type": "string"
+		},
+		"sqldatawarehouse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sqldatawarehouse'"
+		},
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name"
+		},
+		"sqldatabase_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sqldatabase'"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [{
+			"name": "[concat(parameters('factoryName'), '/CreateLineageSp')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [{
+					"name": "Execute sp",
+					"type": "SqlServerStoredProcedure",
+					"dependsOn": [],
+					"policy": {
+						"timeout": "7.00:00:00",
+						"retry": 0,
+						"retryIntervalInSeconds": 30,
+						"secureOutput": false,
+						"secureInput": false
+					},
+					"userProperties": [],
+					"typeProperties": {
+						"storedProcedureName": "[[dbo].[sp_create_lineage]",
+						"storedProcedureParameters": {
+							"activity_name": {
+								"value": {
+									"value": "@pipeline().parameters.ActivityName",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"datafactory_name": {
+								"value": {
+									"value": "@pipeline().DataFactory",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"pipeline_name": {
+								"value": {
+									"value": "@pipeline().parameters.PipelineName",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"destination_azure_resource": {
+								"value": {
+									"value": "@pipeline().parameters.DestinationAzureResource",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"destination_dataset": {
+								"value": {
+									"value": "@pipeline().parameters.DestinationDataset",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"destination_type": {
+								"value": {
+									"value": "@pipeline().parameters.DestinationType",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"execution_end_time": {
+								"value": {
+									"value": "@pipeline().parameters.ExecutionEndTime",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"execution_start_time": {
+								"value": {
+									"value": "@pipeline().parameters.ExecutionStartTime",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"source_azure_resource": {
+								"value": {
+									"value": "@pipeline().parameters.SourceAzureResource",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"source_dataset": {
+								"value": {
+									"value": "@pipeline().parameters.SourceDataset",
+									"type": "Expression"
+								},
+								"type": "String"
+							},
+							"source_type": {
+								"value": {
+									"value": "@pipeline().parameters.SourceType",
+									"type": "Expression"
+								},
+								"type": "String"
+							}
+						}
+					},
+					"linkedServiceName": {
+						"referenceName": "sqldatabase",
+						"type": "LinkedServiceReference"
+					}
+				}],
+				"parameters": {
+					"ExecutionStartTime": {
+						"type": "string"
+					},
+					"ExecutionEndTime": {
+						"type": "string"
+					},
+					"SourceDataset": {
+						"type": "string",
+						"defaultValue": "OneFile"
+					},
+					"SourceType": {
+						"type": "string"
+					},
+					"SourceAzureResource": {
+						"type": "string"
+					},
+					"DestinationDataset": {
+						"type": "string"
+					},
+					"DestinationType": {
+						"type": "string",
+						"defaultValue": "azure_datalake_gen2_resource_set"
+					},
+					"DestinationAzureResource": {
+						"type": "string"
+					},
+					"PipelineName": {
+						"type": "string",
+						"defaultValue": "pipelineName"
+					},
+					"ActivityName": {
+						"type": "string",
+						"defaultValue": "ActivityName"
+					}
+				},
+				"variables": {
+					"MessageText": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqldatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataCopyWithLineage')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [{
+						"name": "Copy Data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": false,
+									"wildcardFolderPath": "*",
+									"wildcardFileName": "*.*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [{
+							"referenceName": "SampleAdlsSource",
+							"type": "DatasetReference",
+							"parameters": {}
+						}],
+						"outputs": [{
+							"referenceName": "salesadls",
+							"type": "DatasetReference",
+							"parameters": {}
+						}]
+					},
+					{
+						"name": "ReportLineage",
+						"type": "ExecutePipeline",
+						"dependsOn": [{
+							"activity": "Copy Data1",
+							"dependencyConditions": [
+								"Succeeded"
+							]
+						}],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CreateLineageSp",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"ExecutionStartTime": {
+									"value": "@{activity('Copy Data1').ExecutionStartTime}",
+									"type": "Expression"
+								},
+								"ExecutionEndTime": {
+									"value": "@{activity('Copy Data1').ExecutionEndTime}",
+									"type": "Expression"
+								},
+								"SourceDataset": "SampleAdlsSource",
+								"SourceType": "azure_datalake_gen2_resource_set",
+                                "SourceAzureResource": "parameters('adls_properties_url')/parameters('adls_name')/example_sales_folder",
+								"DestinationDataset": "salesadls",
+								"DestinationType": "azure_datalake_gen2_filesystem",
+                                "DestinationAzureResource": "parameters('adls_properties_url')/parameters('adls_name')",
+								"PipelineName": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"ActivityName": {
+									"value": "Copy Data1",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Copy SQL to ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlDWSource"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [{
+							"referenceName": "AzureSqlDWTable1",
+							"type": "DatasetReference",
+							"parameters": {}
+						}],
+						"outputs": [{
+							"referenceName": "salesadls",
+							"type": "DatasetReference",
+							"parameters": {}
+						}]
+					},
+					{
+						"name": "Report Sql2AdlsCopy Lineage",
+						"type": "ExecutePipeline",
+						"dependsOn": [{
+							"activity": "Copy SQL to ADLS",
+							"dependencyConditions": [
+								"Succeeded"
+							]
+						}],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "CreateLineageSp",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"ExecutionStartTime": {
+									"value": "@{activity('Copy SQL to ADLS').ExecutionStartTime}",
+									"type": "Expression"
+								},
+								"ExecutionEndTime": {
+									"value": "@{activity('Copy SQL to ADLS').ExecutionEndTime}",
+									"type": "Expression"
+								},
+								"SourceDataset": "AzureSqlDWTable1",
+								"SourceType": "azure_sql_table",
+								"SourceAzureResource": "https://parameters('sql_server_name').database.windows.net/parameters('sql_dw_name')/exampletable",
+								"DestinationDataset": "salesadls",
+								"DestinationType": "azure_datalake_gen2_filesystem",
+								"DestinationAzureResource": "parameters('adls_properties_url')/parameters('adls_name')",
+								"PipelineName": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								},
+								"ActivityName": {
+									"value": "Copy SQL to ADLS",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SampleAdlsSource')]",
+				"[concat(variables('factoryId'), '/datasets/salesadls')]",
+				"[concat(variables('factoryId'), '/pipelines/CreateLineageSp')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSqlDWTable1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sqldatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('sqldatabase_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sqldatawarehouse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('sqldatawarehouse_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/adls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('adls_properties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adls_primary_access_key')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SampleAdlsSource')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "",
+						"fileSystem": "[parameters('adls_name')]"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/adls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/salesadls')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "[parameters('adls_name')]"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/adls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDWTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqldatawarehouse",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [{
+						"name": "CustomerID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Discount",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "ProductID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SalesDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "SalesID",
+						"type": "varchar"
+					},
+					{
+						"name": "SalesPersonID",
+						"type": "varchar"
+					},
+					{
+						"name": "TotalPrice",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "TransactionNumber",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "exampletable"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqldatawarehouse')]"
+			]
+		}
+	]
+}

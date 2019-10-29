@@ -1,0 +1,1 @@
+CustomerID,Discount,ProductID,Quantity,SalesDate,SalesID,SalesPersonID,TotalPrice,TransactionNumber
