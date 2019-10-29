@@ -1,7 +1,7 @@
 locals {
   curl_options = "-X POST -s --max-time 1800 --retry-connrefused --retry 100 --retry-delay 30 -H \"Content-Type: application/json\""
   entities_parameters = {
-    database = "https://${data.azurerm_sql_server.base.fqdn}/${var.base_sql_database_name}"
+    database = "https://${data.azurerm_sql_server.base.fqdn}/${var.base_sql_database_name}/"
     storage = "${data.azurerm_storage_account.base.primary_dfs_endpoint}"
   }
   rendered_entities = "${templatefile("${path.module}/atlas_configuration/entities.json", "${local.entities_parameters}")}"
