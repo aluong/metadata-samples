@@ -1,3 +1,13 @@
+locals {
+  curl_options = "-X POST -s --max-time 1800 --retry-connrefused --retry 100 --retry-delay 30 -H \"Content-Type: application/json\""
+  rendered_entities = "${templatefile("${path.module}/atlas_configuration/entities.json", {database = "test", storage = "test"})}"
+  # Remove new lines, extra spaces and replace escape quotes
+  entities = "${replace(replace(replace(local.rendered_entities, "\n", ""), " ", ""), "\"", "\\\"")}"
+}
+
+output "test" {
+  value = "${local.entities}"
+}
 resource "azurerm_container_group" "this" {
   name                  = "${var.atlas_dns_name}"
   resource_group_name   = "${azurerm_resource_group.this.name}"
@@ -36,9 +46,11 @@ resource "azurerm_container_group" "this" {
     }
 
     provisioner "local-exec" {
-      command = <<EOT
-        curl -X POST --max-time 1800 -H "Content-Type: application-json" http://admin:admin@${azurerm_container_group.this.ip_address}:21000/api/atlas/v2/types/typedefs -d @${path.module}/atlas_configuration/typedefs.json
-EOT
+      command = "curl ${local.curl_options} http://admin:admin@${azurerm_container_group.this.ip_address}:21000/api/atlas/v2/types/typedefs -d @${path.module}/atlas_configuration/typedefs.json"
+    }
+
+    provisioner "local-exec" {
+      command = "curl ${local.curl_options} http://admin:admin@${azurerm_container_group.this.ip_address}:21000/api/atlas/v2/entity/bulk -d \"${local.entities}\""
     }
 }
 

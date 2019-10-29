@@ -3,7 +3,7 @@
         {
             "typeName": "azure_datalake_gen2_filesystem",
             "attributes": {
-                "qualifiedName": "${adls}/sales",
+                "qualifiedName": "${storage}/sales",
                 "name": "sales"
             },
             "guid": -1
@@ -11,7 +11,7 @@
         {
             "typeName": "azure_sql_table",
             "attributes": {
-                "qualifiedName": "${sql_database}/salesv2",
+                "qualifiedName": "${database}/salesv2",
                 "name": "salesv2",
                 "principalId": 0
             },
