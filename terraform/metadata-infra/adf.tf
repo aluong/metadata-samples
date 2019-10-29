@@ -14,6 +14,7 @@ resource "azurerm_template_deployment" "test" {
   name                = "acctesttemplate-01"
   resource_group_name = "${azurerm_resource_group.this.name}"
   template_body       = "${file("arm_templates/adf-pipelines.json")}"
+
   parameters = {
     "factoryName" = "${azurerm_data_factory.lineage.name}",
     "sqldatabase_connectionString" = "${var.sql_db_connection_string}",

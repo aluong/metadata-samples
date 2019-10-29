@@ -14,6 +14,16 @@ variable "base_storage_account_name" {
   type        = "string"
 }
 
+variable "base_sql_server_name" {
+  description = "Name of the base sql server"
+  type        = "string"
+}
+
+variable "base_sql_database_name" {
+  description = "Name of the base database"
+  type        = "string"
+}
+
 variable "databricks_name" {
   description = "Name of databricks cluster"
   type        = "string"

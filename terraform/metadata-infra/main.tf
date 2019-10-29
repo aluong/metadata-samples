@@ -43,3 +43,8 @@ data "azurerm_container_registry" "base" {
   name = "${var.base_acr_name}"
   resource_group_name = "${var.base_resource_group_name}"
 }
+
+data "azurerm_sql_server" "base" {
+  name                = "${var.base_sql_server_name}"
+  resource_group_name = "${var.base_resource_group_name}"
+}
