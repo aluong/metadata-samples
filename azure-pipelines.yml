@@ -1,0 +1,156 @@
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'  
+
+variables:
+  azureSubscription: custodiandev
+
+  #### Set these variables in the pipeline ####
+  # prefix: azureuser
+  # tf_infra_sql_username: azureadmin
+  # tf_infra_sql_password: P@SSWORD123
+
+  # terraform backend config
+  tf_backend_resource_group: $[format('{0}{1}', variables['prefix'],'-tf-backend')]
+  tf_backend_storage_account: $[format('{0}{1}', variables['prefix'], 'tfstorage')] 
+  tf_backend_location: 'eastus2'
+  tf_backend_key_infra: infra.terraform.tfstate
+  tf_backend_key_metadata: metadata.terraform.tfstate
+
+  # base infra config
+  tf_infra_resource_group_name: $[format('{0}{1}', variables['prefix'], '-infra')]
+  tf_infra_adls_name: $[format('{0}{1}', variables['prefix'], 'adls')]
+  tf_infra_acr_name: $[format('{0}{1}', variables['prefix'], 'acr')]
+  tf_infra_keyvault_name: $[format('{0}{1}', variables['prefix'], 'akv')]
+
+  # metadata infra config
+  tf_metadata_resource_group_name: $[format('{0}{1}', variables['prefix'], '-metadata')]
+  tf_metadata_databricks_name: $[format('{0}{1}', variables['prefix'], 'databricks')]
+  tf_metadata_atlas_dns_name: $[format('{0}{1}', variables['prefix'], 'aatlas')]
+  tf_metadata_data_factory_name: $[format('{0}{1}', variables['prefix'], 'metadatadf')]
+
+steps:
+- task: AzureCLI@1
+  displayName: Create Terraform backend
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -euo pipefail
+      az group create -n $(tf_backend_resource_group) -l $(tf_backend_location)
+      az storage account create -g $(tf_backend_resource_group) -n $(tf_backend_storage_account) --sku Standard_LRS
+      az storage container create -n terraform --account-name $(tf_backend_storage_account)
+
+- bash: |
+    wget http://curl.haxx.se/download/curl-7.58.0.tar.gz
+    tar -xvf curl-7.58.0.tar.gz
+    cd curl-7*
+    ./configure
+    make
+    sudo make install
+    curl --version
+
+  displayName: "Update curl"
+
+- task: AzureCLI@1
+  displayName: Set Terraform environment variables
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptLocation: inlineScript
+    addSpnToEnvironment: true
+    inlineScript: |
+      set -euo pipefail
+      SUB_ID=`az account show --query id -o tsv`
+      
+      # Configure Terraform SP auth (https://www.terraform.io/docs/providers/azurerm/auth/service_principal_client_secret.html)
+      echo "##vso[task.setvariable variable=ARM_CLIENT_ID]$servicePrincipalId"
+      echo "##vso[task.setvariable variable=ARM_CLIENT_SECRET]$servicePrincipalKey"
+      echo "##vso[task.setvariable variable=ARM_SUBSCRIPTION_ID]$SUB_ID"
+      echo "##vso[task.setvariable variable=ARM_TENANT_ID]$tenantId"
+
+- bash: |
+    set -euo pipefail
+    terraform init \
+      --backend-config='storage_account_name=$(tf_backend_storage_account)' \
+      --backend-config='resource_group_name=$(tf_backend_resource_group)' \
+      --backend-config='key=$(tf_backend_key_infra)'
+
+    terraform apply \
+      -var 'resource_group_name=$(tf_infra_resource_group_name)' \
+      -var 'sql_username=$(tf_infra_sql_username)' \
+      -var 'sql_password=$(tf_infra_sql_password)' \
+      -var 'adls_name=$(tf_infra_adls_name)' \
+      -var 'acr_name=$(tf_infra_acr_name)' \
+      -var 'keyvault_name=$(tf_infra_keyvault_name)' \
+      -auto-approve
+    
+    INFRA_UIA=`terraform output base_user_assigned_identity_name`
+    echo "##vso[task.setvariable variable=INFRA_UIA]$INFRA_UIA"
+
+    INFRA_SA=`terraform output base_storage_account_name`
+    echo "##vso[task.setvariable variable=INFRA_SA]$INFRA_SA"
+
+    INFRA_VNET=`terraform output base_vnet_name`
+    echo "##vso[task.setvariable variable=INFRA_VNET]$INFRA_VNET"
+
+    INFRA_KV=`terraform output base_keyvault_name`
+    echo "##vso[task.setvariable variable=INFRA_KV]$INFRA_KV"
+
+    INFRA_ACR=`terraform output base_acr_name`
+    echo "##vso[task.setvariable variable=INFRA_ACR]$INFRA_ACR"
+
+    INFRA_SQL_SERVER=`terraform output base_sql_server_name`
+    echo "##vso[task.setvariable variable=INFRA_SQL_SERVER]$INFRA_SQL_SERVER"
+
+    INFRA_SQL_DB=`terraform output base_sql_database_name`
+    echo "##vso[task.setvariable variable=INFRA_SQL_DB]$INFRA_SQL_DB"
+
+    INFRA_SQL_DB_CONN=`terraform output sql_db_connection_string`
+    echo "##vso[task.setvariable variable=INFRA_SQL_DB_CONN]$INFRA_SQL_DB_CONN"
+
+    INFRA_SQL_DW_CONN=`terraform output sql_dw_connection_string`
+    echo "##vso[task.setvariable variable=INFRA_SQL_DW_CONN]$INFRA_SQL_DW_CONN"
+
+    INFRA_ADLS_KEY=`terraform output adls_primary_access_key`
+    echo "##vso[task.setvariable variable=INFRA_ADLS_KEY]$INFRA_ADLS_KEY"
+
+    INFRA_ADLS_URl=`terraform output adls_properties_url`
+    echo "##vso[task.setvariable variable=INFRA_ADLS_URl]$INFRA_ADLS_URl"
+
+    INFRA_ADLS=`terraform output adls_name`
+    echo "##vso[task.setvariable variable=INFRA_ADLS]$INFRA_ADLS"
+
+  displayName: 'Deploy base infrastructure'
+  workingDirectory: terraform/base-infra
+
+- bash: |
+    set -euo pipefail
+    terraform init \
+      --backend-config='storage_account_name=$(tf_backend_storage_account)' \
+      --backend-config='resource_group_name=$(tf_backend_resource_group)' \
+      --backend-config='key=$(tf_backend_key_metadata)'
+
+    terraform apply \
+      -var 'resource_group_name=$(tf_metadata_resource_group_name)' \
+      -var 'base_storage_account_name=$(INFRA_SA)' \
+      -var 'databricks_name=$(tf_metadata_databricks_name)' \
+      -var 'base_resource_group_name=$(tf_infra_resource_group_name)' \
+      -var 'base_vnet_name=$(INFRA_VNET)' \
+      -var 'base_user_assigned_identity_name=$(INFRA_UIA)' \
+      -var 'atlas_dns_name=$(tf_metadata_atlas_dns_name)' \
+      -var 'data_factory_name=$(tf_metadata_data_factory_name)' \
+      -var 'base_keyvault_name=$(INFRA_KV)' \
+      -var 'base_acr_name=$(INFRA_ACR)' \
+      -var 'base_sql_server_name=$(INFRA_SQL_SERVER)' \
+      -var 'base_sql_database_name=$(INFRA_SQL_DB)' \
+      -var 'sql_db_connection_string=$(INFRA_SQL_DB_CONN)' \
+      -var 'sql_dw_connection_string=$(INFRA_SQL_DW_CONN)' \
+      -var 'adls_primary_access_key=$(INFRA_ADLS_KEY)' \
+      -var 'adls_properties_url=$(INFRA_ADLS_URl)' \
+      -var 'adls_name=$(INFRA_ADLS)' \
+      -auto-approve
+    
+  displayName: 'Deploy Metadata infrastructure'
+  workingDirectory: terraform/metadata-infra

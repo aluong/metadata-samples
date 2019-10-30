@@ -14,6 +14,16 @@ variable "base_storage_account_name" {
   type        = "string"
 }
 
+variable "base_sql_server_name" {
+  description = "Name of the base sql server"
+  type        = "string"
+}
+
+variable "base_sql_database_name" {
+  description = "Name of the base database"
+  type        = "string"
+}
+
 variable "databricks_name" {
   description = "Name of databricks cluster"
   type        = "string"
@@ -91,4 +101,21 @@ variable "base_acr_name" {
 
 variable "sql_db_connection_string" {
  type = "string" 
+}
+
+variable "sql_dw_connection_string" {
+ type = "string" 
+}
+
+variable "adls_name" {
+ description = "Name of Azure Datalake Storage"
+ type = "string" 
+}
+
+variable "adls_primary_access_key" {
+ type = "string" 
+}
+
+variable "adls_properties_url" {
+  type = "string"
 }
