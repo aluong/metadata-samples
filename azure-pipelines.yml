@@ -43,6 +43,17 @@ steps:
       az storage account create -g $(tf_backend_resource_group) -n $(tf_backend_storage_account) --sku Standard_LRS
       az storage container create -n terraform --account-name $(tf_backend_storage_account)
 
+- bash: |
+    wget http://curl.haxx.se/download/curl-7.58.0.tar.gz
+    tar -xvf curl-7.58.0.tar.gz
+    cd curl-7*
+    ./configure
+    make
+    sudo make install
+    curl --version
+
+  displayName: "Update curl"
+
 - task: AzureCLI@1
   displayName: Set Terraform environment variables
   inputs:
